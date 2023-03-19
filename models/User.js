@@ -20,6 +20,9 @@ const UserSchema = mongoose.Schema({
       },
     },
   },
+  imageURL: {
+    type: String,
+  },
   password: {
     type: String,
     required: true,
