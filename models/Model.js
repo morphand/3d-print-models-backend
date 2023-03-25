@@ -10,6 +10,17 @@ const ModelSchema = mongoose.Schema({
       "The model's name has to be less than 100 characters long.",
     ],
   },
+  description: {
+    type: String,
+    minLength: 0,
+    maxLength: [
+      2000,
+      "The model's description has to be less than 2000 characters long.",
+    ],
+  },
+  path: {
+    type: String,
+  },
   creator: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
