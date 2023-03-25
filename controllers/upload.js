@@ -1,7 +1,10 @@
 const fs = require("fs/promises");
+const Model = require("../models/Model");
 
 async function upload(req, res) {
-  const { creatorId, modelName } = JSON.parse(req.body.modelInfo);
+  const { creatorId, modelName, modelDescription } = JSON.parse(
+    req.body.modelInfo
+  );
   const files = Object.values(req.files);
   const uploadDir = `./uploads/${creatorId}/${modelName}`;
 
@@ -26,6 +29,15 @@ async function upload(req, res) {
     // Move each file.
     file.mv(filePath);
   });
+
+  // Save to database.
+  const model = new Model({
+    name: modelName,
+    description: modelDescription,
+    path: uploadDir,
+    creator: creatorId,
+  });
+  await model.save();
 
   return res.json(true);
 }
