@@ -65,4 +65,6 @@ async function createToken(_id, username) {
   }
 }
 
-module.exports = { register, login };
+const authService = { register, login };
+
+module.exports = authService;
