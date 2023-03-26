@@ -49,6 +49,10 @@ const ModelSchema = mongoose.Schema({
       ref: "Comment",
     },
   ],
+  isFeatured: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const ModelModel = mongoose.model("Model", ModelSchema);
