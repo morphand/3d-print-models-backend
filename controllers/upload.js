@@ -1,15 +1,19 @@
 const fs = require("fs/promises");
 const Model = require("../models/Model");
+const Result = require("../utils/Result");
 
 async function upload(req, res) {
   const { creatorId, modelName, modelDescription } = JSON.parse(
     req.body.modelInfo
   );
-  const files = Object.values(req.files);
-  const uploadDir = `./uploads/${creatorId}/${modelName}`;
 
-  if (!creatorId || !modelName) {
-    return res.json(false);
+  const uploadDir = `./uploads/${creatorId}/${modelName}`;
+  const imagesDir = `${uploadDir}/images`;
+  const result = new Result();
+
+  if (!creatorId || !modelName || !req.files) {
+    result.errors.push("Creator ID, model name and files are required.");
+    return res.json(result);
   }
 
   // Check if there is an uploadDir available.
@@ -19,16 +23,23 @@ async function upload(req, res) {
     // Create the directories recursively if the uploadDir does not exist.
     if (e.code === "ENOENT") {
       await fs.mkdir(uploadDir, { recursive: true });
+      await fs.mkdir(imagesDir, { recursive: true });
     }
   }
 
   // Loop over uploaded files.
-  files.forEach((file) => {
-    const fileName = file.name;
-    const filePath = `${uploadDir}/${fileName}`;
+  for (const [key, value] of Object.entries(req.files)) {
+    const fileName = value.name;
+    let filePath = `${uploadDir}/${fileName}`;
+
+    // Upload images to the images folder.
+    if (key.includes("image")) {
+      filePath = `${uploadDir}/images/${fileName}`;
+    }
+
     // Move each file.
-    file.mv(filePath);
-  });
+    value.mv(filePath);
+  }
 
   // Save to database.
   const model = new Model({
@@ -39,7 +50,8 @@ async function upload(req, res) {
   });
   await model.save();
 
-  return res.json(true);
+  result.status = true;
+  return res.json(result);
 }
 
 module.exports = upload;
