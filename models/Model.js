@@ -7,7 +7,7 @@ const ModelSchema = mongoose.Schema({
     minLength: [2, "The model's name has to be more than 2 characters long."],
     maxLength: [
       45,
-      "The model's name has to be less than 100 characters long.",
+      "The model's name has to be less than 45 characters long.",
     ],
   },
   description: {
