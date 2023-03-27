@@ -9,6 +9,7 @@ const loginController = require("./controllers/login");
 const registerController = require("./controllers/register");
 const userController = require("./controllers/user");
 const uploadController = require("./controllers/upload");
+const catalogController = require("./controllers/catalog");
 
 const constants = require("./constants");
 
@@ -24,6 +25,8 @@ app.use(
     limits: { fileSize: 50 * 1024 * 1024 },
   })
 );
+app.use("/uploads", express.static("uploads"));
+app.use(/uploads\/.+\/.+\/images/, express.static("uploads"));
 
 mongoose.connect(`mongodb://127.0.0.1/${constants.DB_NAME}`).then(() => {
   console.log(`Connected to database ${constants.DB_NAME}.`);
@@ -41,5 +44,23 @@ app.post("/register", registerController);
 // User API endpoint
 app.get("/api/user/:id", userController);
 
+// Edit user GET API endpoint
+app.get("/api/user/:id/edit", userController);
+
 // Upload endpoint
 app.post("/api/user/:id/upload", uploadController);
+
+// Catalog endpoint
+app.get("/api/catalog", catalogController.getAll);
+
+// Featured models endpoint
+app.get("/api/featuredModels", catalogController.getFeaturedModels);
+
+// Single model endpoint
+app.get("/api/models/:id", catalogController.getModel);
+
+// Get model comments endpoint
+app.get("/api/models/:id/comments");
+
+// Post comments endpoint
+app.post("/api/models/:id/comments", catalogController.addCommentToModel);

@@ -1,4 +1,5 @@
 const fs = require("fs/promises");
+const User = require("../models/User");
 const Model = require("../models/Model");
 const Result = require("../utils/Result");
 
@@ -49,6 +50,13 @@ async function upload(req, res) {
     creator: creatorId,
   });
   await model.save();
+
+  // Update user model.
+  const user = await User.findById(creatorId).populate("uploadedModels").lean();
+  user.uploadedModels.push(model._id);
+  await User.findByIdAndUpdate(creatorId, {
+    uploadedModels: user.uploadedModels,
+  });
 
   result.status = true;
   return res.json(result);

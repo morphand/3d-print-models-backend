@@ -9,6 +9,10 @@ const CommentSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Model",
   },
+  comment: {
+    type: String,
+    required: true
+  },
   date: {
     type: Date,
     default: new Date(),
