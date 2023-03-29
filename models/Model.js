@@ -5,10 +5,7 @@ const ModelSchema = mongoose.Schema({
     type: String,
     required: true,
     minLength: [2, "The model's name has to be more than 2 characters long."],
-    maxLength: [
-      45,
-      "The model's name has to be less than 45 characters long.",
-    ],
+    maxLength: [45, "The model's name has to be less than 45 characters long."],
   },
   description: {
     type: String,
@@ -37,6 +34,12 @@ const ModelSchema = mongoose.Schema({
     min: 0,
     default: 0,
   },
+  usersLikedModel: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
   commentsCount: {
     type: Number,
     required: true,
