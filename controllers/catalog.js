@@ -39,8 +39,26 @@ async function getModel(req, res) {
 async function addCommentToModel(req, res) {
   const modelId = req.params.id;
   const comment = req.body.comment;
-  const model = await modelService.addCommentToModel(modelId, comment);
-  return res.json(req.body);
+  const creatorUsername = req.body.creatorUsername;
+  const model = await modelService.addCommentToModel(
+    modelId,
+    comment,
+    creatorUsername
+  );
+  return res.json(true);
+}
+
+async function getModelComments(req, res) {
+  const modelId = req.params.id;
+  const comments = await modelService.getModelComments(modelId);
+  return res.json(comments);
+}
+
+async function postLikeModel(req, res) {
+  const modelId = req.params.id;
+  const userId = req.body.userId;
+  const model = await modelService.likeModel(modelId, userId);
+  return res.json(model);
 }
 
 const catalogController = {
@@ -48,6 +66,8 @@ const catalogController = {
   getFeaturedModels,
   getModel,
   addCommentToModel,
+  getModelComments,
+  postLikeModel,
 };
 
 module.exports = catalogController;
