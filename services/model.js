@@ -3,6 +3,7 @@ const fs = require("fs");
 // Models
 const Model = require("../models/Model");
 const Comment = require("../models/Comment");
+const User = require("../models/User");
 
 async function getModelById(modelId) {
   const result = await Model.findById(modelId)
@@ -63,12 +64,13 @@ function getModelImages(creatorId, modelName) {
   return modelImages;
 }
 
-async function addCommentToModel(modelId, comment) {
+async function addCommentToModel(modelId, comment, creatorUsername) {
   const model = await Model.findById(modelId);
 
   // Comment
   const commentToInsert = new Comment({
     creatorId: model.creator._id,
+    creatorUsername: creatorUsername,
     modelCommented: modelId,
     comment: comment,
   });
@@ -79,7 +81,25 @@ async function addCommentToModel(modelId, comment) {
   model.commentsCount++;
   model.comments.push(insertedComment._id);
   await model.save();
-  console.log(model, commentToInsert, insertedComment);
+}
+
+async function getModelComments(modelId) {
+  const comments = await Model.findById(modelId)
+    .select("-_id comments")
+    .populate("comments")
+    .lean();
+  return comments;
+}
+
+async function likeModel(modelId, userId) {
+  const user = await User.findById(userId);
+  const model = await Model.findById(modelId);
+  user.likedModels.push(model._id);
+  model.likesCount++;
+  model.usersLikedModel.push(user._id);
+  await user.save();
+  await model.save();
+  return user;
 }
 
 const modelService = {
@@ -90,6 +110,8 @@ const modelService = {
   getModelFiles,
   getModelImages,
   addCommentToModel,
+  getModelComments,
+  likeModel,
 };
 
 module.exports = modelService;
