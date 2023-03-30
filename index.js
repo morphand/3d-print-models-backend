@@ -26,6 +26,7 @@ app.use(
   })
 );
 app.use("/uploads", express.static("uploads"));
+app.use("/static", express.static("static"));
 app.use(/uploads\/.+\/.+\/images/, express.static("uploads"));
 
 mongoose.connect(`mongodb://127.0.0.1/${constants.DB_NAME}`).then(() => {
@@ -60,7 +61,10 @@ app.get("/api/featuredModels", catalogController.getFeaturedModels);
 app.get("/api/models/:id", catalogController.getModel);
 
 // Get model comments endpoint
-app.get("/api/models/:id/comments");
+app.get("/api/models/:id/comments", catalogController.getModelComments);
 
 // Post comments endpoint
 app.post("/api/models/:id/comments", catalogController.addCommentToModel);
+
+// Like comments endpoint
+app.post("/api/models/:id/like", catalogController.postLikeModel);
