@@ -110,8 +110,18 @@ async function isUserModelCreator(modelId, userId) {
   return false;
 }
 
-async function deleteModel(modelId) {
+async function deleteModel(modelId, userId) {
+  // Delete model.
   const deletedModel = await Model.findByIdAndDelete(modelId);
+
+  // Get creator id from the deleted model.
+  const creatorId = deletedModel.creator._id.toString();
+
+  // Remove model from the users' uploaded models.
+  await User.findByIdAndUpdate(creatorId, {
+    $pull: { uploadedModels: modelId },
+  });
+
   return deletedModel;
 }
 
