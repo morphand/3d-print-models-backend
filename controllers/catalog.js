@@ -1,6 +1,8 @@
 // Services
 const modelService = require("../services/model");
 
+const Result = require("../utils/Result");
+
 async function getAll(req, res) {
   const models = await modelService.getAllModels();
   models.map((model) => {
@@ -61,6 +63,24 @@ async function postLikeModel(req, res) {
   return res.json(model);
 }
 
+async function deleteModel(req, res) {
+  const modelId = req.params.id;
+  const userId = req.body.userId;
+  const result = new Result();
+  const isUserModelCreator = await modelService.isUserModelCreator(
+    modelId,
+    userId
+  );
+  if (!isUserModelCreator) {
+    result.errors.push("You are not the model creator.");
+    return result;
+  }
+  const deletedModel = await modelService.deleteModel(modelId);
+  result.status = true;
+  result.value = deletedModel;
+  return res.json(result);
+}
+
 const catalogController = {
   getAll,
   getFeaturedModels,
@@ -68,6 +88,7 @@ const catalogController = {
   addCommentToModel,
   getModelComments,
   postLikeModel,
+  deleteModel,
 };
 
 module.exports = catalogController;
