@@ -102,6 +102,19 @@ async function likeModel(modelId, userId) {
   return user;
 }
 
+async function isUserModelCreator(modelId, userId) {
+  const model = await getModelById(modelId);
+  if (model.creator._id.toString() === userId) {
+    return true;
+  }
+  return false;
+}
+
+async function deleteModel(modelId) {
+  const deletedModel = await Model.findByIdAndDelete(modelId);
+  return deletedModel;
+}
+
 const modelService = {
   getModelById,
   getNModels,
@@ -112,6 +125,8 @@ const modelService = {
   addCommentToModel,
   getModelComments,
   likeModel,
+  isUserModelCreator,
+  deleteModel,
 };
 
 module.exports = modelService;
