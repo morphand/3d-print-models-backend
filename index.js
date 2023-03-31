@@ -60,11 +60,14 @@ app.get("/api/featuredModels", catalogController.getFeaturedModels);
 // Single model endpoint
 app.get("/api/models/:id", catalogController.getModel);
 
+// Delete model endpoint
+app.delete("/api/models/:id", catalogController.deleteModel);
+
 // Get model comments endpoint
 app.get("/api/models/:id/comments", catalogController.getModelComments);
 
 // Post comments endpoint
 app.post("/api/models/:id/comments", catalogController.addCommentToModel);
 
-// Like comments endpoint
+// Like model endpoint
 app.post("/api/models/:id/like", catalogController.postLikeModel);
