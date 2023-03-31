@@ -20,6 +20,10 @@ const UserSchema = mongoose.Schema({
       },
     },
   },
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
   imageURL: {
     type: String,
     default: "",
