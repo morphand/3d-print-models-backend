@@ -49,7 +49,7 @@ async function upload(req, res) {
     path: uploadDir,
     creator: creatorId,
   });
-  await model.save();
+  const savedModel = await model.save();
 
   // Update user model.
   const user = await User.findById(creatorId).populate("uploadedModels").lean();
@@ -59,6 +59,7 @@ async function upload(req, res) {
   });
 
   result.status = true;
+  result.value = savedModel;
   return res.json(result);
 }
 
