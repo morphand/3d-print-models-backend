@@ -8,8 +8,19 @@ async function upload(req, res) {
     req.body.modelInfo
   );
 
-  const uploadDir = `./uploads/${creatorId}/${modelName}`;
+  // Create the model.
+  const model = new Model({
+    name: modelName,
+    description: modelDescription,
+    creator: creatorId,
+  });
+
+  const uploadDir = `./uploads/${creatorId}/${model._id.toString()}`;
   const imagesDir = `${uploadDir}/images`;
+
+  // Add path to model.
+  model.path = uploadDir;
+
   const result = new Result();
 
   if (!creatorId || !modelName || !req.files) {
@@ -43,12 +54,6 @@ async function upload(req, res) {
   }
 
   // Save to database.
-  const model = new Model({
-    name: modelName,
-    description: modelDescription,
-    path: uploadDir,
-    creator: creatorId,
-  });
   const savedModel = await model.save();
 
   // Update user model.
