@@ -43,19 +43,24 @@ async function login(username, password) {
       throw new Error("The password is not correct.");
     }
     // Create token
-    const token = await createToken(userResult._id, userResult.username);
+    const token = await createToken(
+      userResult._id,
+      userResult.username,
+      userResult.isAdmin
+    );
     return token;
   } catch (e) {
     throw e;
   }
 }
 
-async function createToken(_id, username) {
+async function createToken(_id, username, isAdmin) {
   try {
     const token = await jwt.sign(
       {
         _id,
         username,
+        isAdmin,
       },
       constants.JWT_SECRET
     );
@@ -65,6 +70,11 @@ async function createToken(_id, username) {
   }
 }
 
-const authService = { register, login };
+async function isUserAdmin(userId) {
+  const user = await User.findById(userId).lean();
+  return user.isAdmin;
+}
+
+const authService = { register, login, isUserAdmin };
 
 module.exports = authService;

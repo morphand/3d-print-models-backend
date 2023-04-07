@@ -11,7 +11,9 @@ const userController = require("./controllers/user");
 const uploadController = require("./controllers/upload");
 const catalogController = require("./controllers/catalog");
 
-const constants = require("./constants");
+const { PORT, DB_NAME } = require("./constants");
+
+const authToken = require("./middlewares/authToken");
 
 // Init
 const app = express();
@@ -28,25 +30,29 @@ app.use(
 app.use("/uploads", express.static("uploads"));
 app.use("/static", express.static("static"));
 app.use(/uploads\/.+\/.+\/images/, express.static("uploads"));
+app.use(authToken);
 
-mongoose.connect(`mongodb://127.0.0.1/${constants.DB_NAME}`).then(() => {
-  console.log(`Connected to database ${constants.DB_NAME}.`);
-  app.listen(constants.PORT, () => {
-    console.log(`Server listening on port ${constants.PORT}.`);
+mongoose.connect(`mongodb://127.0.0.1/${DB_NAME}`).then(() => {
+  console.log(`Connected to database ${DB_NAME}.`);
+  app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}.`);
   });
 });
 
 // Login
-app.post("/login", loginController);
+app.post("/api/login", loginController);
 
 // Register
-app.post("/register", registerController);
+app.post("/api/register", registerController);
 
 // User API endpoint
-app.get("/api/user/:id", userController);
+app.get("/api/user/:id", userController.getUser);
 
-// Edit user GET API endpoint
-app.get("/api/user/:id/edit", userController);
+// Edit user API endpoint
+app.post("/api/user/:id/edit", userController.postEditUser);
+
+// Get user models endpoint
+app.get("/api/user/:id/models", userController.getUserModels);
 
 // Upload endpoint
 app.post("/api/user/:id/upload", uploadController);
@@ -63,11 +69,35 @@ app.get("/api/models/:id", catalogController.getModel);
 // Delete model endpoint
 app.delete("/api/models/:id", catalogController.deleteModel);
 
+// Edit model endpoint
+app.post("/api/models/:id/edit", catalogController.postEditModel);
+
 // Get model comments endpoint
 app.get("/api/models/:id/comments", catalogController.getModelComments);
 
 // Post comments endpoint
 app.post("/api/models/:id/comments", catalogController.addCommentToModel);
 
-// Like model endpoint
-app.post("/api/models/:id/like", catalogController.postLikeModel);
+// Delete comments endpoint
+app.delete("/api/models/:id/comments", catalogController.deleteComment);
+
+// Add like model endpoint
+app.post("/api/models/:id/like/add", catalogController.postLikeModel);
+
+// Remove like model endpoint
+app.post("/api/models/:id/like/remove", catalogController.postDislikeModel);
+
+// Feature model endpoint
+app.post("/api/models/:id/feature/add", catalogController.postFeatureModel);
+
+// Remove feature model endpoint
+app.post(
+  "/api/models/:id/feature/remove",
+  catalogController.postRemoveFeatureModel
+);
+
+// Download model endpoint
+app.put("/api/models/:id/download", catalogController.postDownloadModel);
+
+// Search model endpoint
+app.post("/api/models/search/", catalogController.postSearchModel);
