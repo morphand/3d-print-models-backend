@@ -39,8 +39,9 @@ async function getFeaturedModels() {
   return result;
 }
 
-function getModelFiles(creatorId, modelName) {
-  const modelDirContent = fs.readdirSync(`./uploads/${creatorId}/${modelName}`);
+function getModelFiles(modelPath) {
+  modelPath = modelPath.replace("./", "");
+  const modelDirContent = fs.readdirSync(modelPath);
   const modelFiles = modelDirContent
     .filter(
       (file) =>
@@ -48,18 +49,17 @@ function getModelFiles(creatorId, modelName) {
     )
     .map(
       (fileName) =>
-        (fileName = `http://localhost:5000/uploads/${creatorId}/${modelName}/${fileName}`)
+        (fileName = `http://localhost:5000/${modelPath}/${fileName}`)
     );
   return modelFiles;
 }
 
-function getModelImages(creatorId, modelName) {
-  const modelImagesContent = fs.readdirSync(
-    `./uploads/${creatorId}/${modelName}/images`
-  );
+function getModelImages(modelPath) {
+  modelPath = modelPath.replace("./", "");
+  const modelImagesContent = fs.readdirSync(`${modelPath}/images`);
   const modelImages = modelImagesContent.map(
     (fileName) =>
-      (fileName = `http://localhost:5000/uploads/${creatorId}/${modelName}/images/${fileName}`)
+      (fileName = `http://localhost:5000/${modelPath}/images/${fileName}`)
   );
   return modelImages;
 }
@@ -91,6 +91,11 @@ async function getModelComments(modelId) {
   return comments;
 }
 
+async function getModelCreator(modelId) {
+  const model = await getModelById(modelId);
+  return model.creator;
+}
+
 async function likeModel(modelId, userId) {
   const user = await User.findById(userId);
   const model = await Model.findById(modelId);
@@ -110,12 +115,20 @@ async function isUserModelCreator(modelId, userId) {
   return false;
 }
 
-async function deleteModel(modelId, userId) {
+async function deleteModel(modelId) {
   // Delete model.
   const deletedModel = await Model.findByIdAndDelete(modelId);
 
   // Get creator id from the deleted model.
   const creatorId = deletedModel.creator._id.toString();
+
+  // Remove the entry from the users that liked the model.
+  const usersLikedModel = deletedModel.usersLikedModel;
+  for (const userId of usersLikedModel) {
+    await User.findByIdAndUpdate(userId, {
+      $pull: { likedModels: modelId },
+    });
+  }
 
   // Remove model from the users' uploaded models.
   await User.findByIdAndUpdate(creatorId, {
@@ -123,6 +136,71 @@ async function deleteModel(modelId, userId) {
   });
 
   return deletedModel;
+}
+
+async function featureModel(modelId) {
+  const featuredModel = await Model.findByIdAndUpdate(modelId, {
+    isFeatured: true,
+  });
+  return featuredModel;
+}
+
+async function removeFeatureModel(modelId) {
+  const featuredModel = await Model.findByIdAndUpdate(modelId, {
+    isFeatured: false,
+  });
+  return featuredModel;
+}
+
+async function dislikeModel(modelId, userId) {
+  const user = await User.findByIdAndUpdate(userId, {
+    $pull: { likedModels: modelId },
+  });
+  const model = await Model.findByIdAndUpdate(modelId, {
+    $pull: { usersLikedModel: userId },
+    $inc: { likesCount: -1 },
+  });
+  return user;
+}
+
+async function incrementDownloadCount(modelId) {
+  const model = await Model.findByIdAndUpdate(modelId, {
+    $inc: { downloadsCount: +1 },
+  });
+  return model;
+}
+
+async function editModel(modelId, modelName, modelDescription) {
+  const model = await Model.findByIdAndUpdate(modelId, {
+    $set: { name: modelName, description: modelDescription },
+  });
+  return model;
+}
+
+async function deleteComment(modelId, commentId, isUserAdmin) {
+  if (isUserAdmin) {
+    const comment = await Comment.findByIdAndDelete(commentId);
+    const model = await Model.findByIdAndUpdate(modelId, {
+      $pull: { comments: commentId },
+      $inc: { commentsCount: -1 },
+    });
+    return model;
+  }
+  return null;
+}
+
+async function searchModel(searchTerm) {
+  const regex = new RegExp(searchTerm, "gi");
+  const models = await Model.find({ name: { $regex: regex } })
+    .populate("creator")
+    .lean();
+  for (const model of models) {
+    const modelFiles = getModelFiles(model.path);
+    const modelImages = getModelImages(model.path);
+    model.files = modelFiles;
+    model.images = modelImages;
+  }
+  return models;
 }
 
 const modelService = {
@@ -134,9 +212,17 @@ const modelService = {
   getModelImages,
   addCommentToModel,
   getModelComments,
+  getModelCreator,
   likeModel,
   isUserModelCreator,
   deleteModel,
+  featureModel,
+  removeFeatureModel,
+  dislikeModel,
+  incrementDownloadCount,
+  editModel,
+  deleteComment,
+  searchModel,
 };
 
 module.exports = modelService;
