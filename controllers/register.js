@@ -8,6 +8,7 @@ const validators = require("../utils/validators");
 async function register(req, res) {
   const username = req.body.username.trim();
   const email = req.body.email.trim();
+  const imageURL = req.body.imageURL.trim();
   const password = req.body.password.trim();
   const repeatPassword = req.body.repeatPassword.trim();
   const result = new Result();
@@ -28,6 +29,10 @@ async function register(req, res) {
     result.errors.push("Invalid email.");
     return res.json(result);
   }
+  if (!validators.isValidImageURL(imageURL)) {
+    result.errors.push("Invalid image URL.");
+    return res.json(result);
+  }
   if (!validators.isValidPassword(password)) {
     result.errors.push("Invalid password.");
     return res.json(result);
@@ -37,7 +42,7 @@ async function register(req, res) {
     return res.json(result);
   }
   try {
-    const token = await authService.register(username, email, password);
+    const token = await authService.register(username, email, imageURL, password);
     result.status = true;
     result.value.token = token;
     result.value.username = username;

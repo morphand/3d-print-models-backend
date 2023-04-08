@@ -15,12 +15,13 @@ const constants = require("../constants");
  * @param {String} email
  * @param {String} password
  */
-async function register(username, email, password) {
+async function register(username, email, imageURL, password) {
   try {
     // Save the created user
     const user = new User({
       username,
       email,
+      imageURL,
       password: await bcrypt.hash(password, constants.BCRYPT_SALT_ROUNDS),
     });
     const userResult = await user.save();

@@ -52,6 +52,19 @@ function isValidEmail(email) {
 }
 
 /**
+ * @param {String} imageURL
+ * @returns {Boolean}
+ */
+function isValidImageURL(imageURL) {
+  imageURL = imageURL.trim();
+  const regex = new RegExp(/^https?:\/\/.+\..+/, "i");
+  if (!imageURL || !regex.test(imageURL)) {
+    return false;
+  }
+  return true;
+}
+
+/**
  * @param {String} password
  */
 function isValidPassword(password) {
@@ -78,6 +91,7 @@ module.exports = {
   emailExists,
   isValidUsername,
   isValidEmail,
+  isValidImageURL,
   isValidPassword,
   arePasswordsMatching,
 };
