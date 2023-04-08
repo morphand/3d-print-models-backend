@@ -4,9 +4,9 @@ const Model = require("../models/Model");
 const Result = require("../utils/Result");
 
 async function upload(req, res) {
-  const { creatorId, modelName, modelDescription } = JSON.parse(
-    req.body.modelInfo
-  );
+  const creatorId = req.body.creatorId;
+  const modelName = req.body.modelName;
+  const modelDescription = req.body.modelDescription;
 
   // Create the model.
   const model = new Model({
