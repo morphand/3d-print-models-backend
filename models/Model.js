@@ -56,6 +56,14 @@ const ModelSchema = mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  dateUploaded: {
+    type: Date,
+    default: Date.now,
+  },
+  dateLastModified: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const ModelModel = mongoose.model("Model", ModelSchema);
