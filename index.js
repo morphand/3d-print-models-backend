@@ -48,6 +48,9 @@ app.post("/api/register", registerController);
 // User API endpoint
 app.get("/api/user/:id", userController.getUser);
 
+// Edit user GET API endpoint
+app.get("/api/user/:id/edit", userController.getEditUser);
+
 // Edit user API endpoint
 app.post("/api/user/:id/edit", userController.postEditUser);
 

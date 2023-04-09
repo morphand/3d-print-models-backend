@@ -62,7 +62,9 @@ const ModelSchema = mongoose.Schema({
   },
   dateLastModified: {
     type: Date,
-    default: Date.now,
+  },
+  dateFeatured: {
+    type: Date,
   },
 });
 

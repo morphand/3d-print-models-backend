@@ -35,6 +35,7 @@ async function getFeaturedModels() {
     .limit(4)
     .populate("creator")
     .populate("comments")
+    .sort({ dateFeatured: -1 })
     .lean();
   return result;
 }
@@ -141,6 +142,7 @@ async function deleteModel(modelId) {
 async function featureModel(modelId) {
   const featuredModel = await Model.findByIdAndUpdate(modelId, {
     isFeatured: true,
+    dateFeatured: Date.now(),
   });
   return featuredModel;
 }
@@ -172,7 +174,11 @@ async function incrementDownloadCount(modelId) {
 
 async function editModel(modelId, modelName, modelDescription) {
   const model = await Model.findByIdAndUpdate(modelId, {
-    $set: { name: modelName, description: modelDescription },
+    $set: {
+      name: modelName,
+      description: modelDescription,
+      dateLastModified: Date.now(),
+    },
   });
   return model;
 }
